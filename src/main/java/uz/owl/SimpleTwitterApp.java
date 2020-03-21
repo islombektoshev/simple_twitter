@@ -1,5 +1,6 @@
 package uz.owl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import uz.owl.config.ApplicationProperties;
 
 import io.github.jhipster.config.DefaultProfileUtil;
@@ -14,6 +15,7 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.core.env.Environment;
+import uz.owl.service.InitialApp;
 
 import javax.annotation.PostConstruct;
 import java.net.InetAddress;
@@ -29,6 +31,8 @@ public class SimpleTwitterApp {
     private static final Logger log = LoggerFactory.getLogger(SimpleTwitterApp.class);
 
     private final Environment env;
+    @Autowired
+    private InitialApp initialApp;
 
     public SimpleTwitterApp(Environment env) {
         this.env = env;
@@ -43,6 +47,7 @@ public class SimpleTwitterApp {
      */
     @PostConstruct
     public void initApplication() {
+        initialApp.init();
         Collection<String> activeProfiles = Arrays.asList(env.getActiveProfiles());
         if (activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) && activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_PRODUCTION)) {
             log.error("You have misconfigured your application! It should not run " +

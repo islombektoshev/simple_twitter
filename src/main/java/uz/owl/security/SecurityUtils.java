@@ -5,6 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import uz.owl.domain.User;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -25,6 +26,19 @@ public final class SecurityUtils {
     public static Optional<String> getCurrentUserLogin() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         return Optional.ofNullable(extractPrincipal(securityContext.getAuthentication()));
+    }
+
+    public static Long getCurrentUserId() {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        Authentication authentication = securityContext.getAuthentication();
+        Long userId = null;
+        if (authentication != null) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof User) {
+                userId = ((User) principal).getId();
+            }
+        }
+        return userId;
     }
 
     private static String extractPrincipal(Authentication authentication) {

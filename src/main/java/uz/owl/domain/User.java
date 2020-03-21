@@ -13,9 +13,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A user.
@@ -24,12 +22,31 @@ import java.util.Set;
 @Table(name = "jhi_user")
 public class User extends AbstractAuditingEntity implements Serializable {
 
-    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
     private Long id;
+
+
+    @ManyToMany
+    @JoinTable(
+        name = "followers",
+        inverseJoinColumns = @JoinColumn(name = "follower_id"),
+        joinColumns = @JoinColumn(name = "user_id")
+    )
+    private final Set<User> followers = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+        name = "posts",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "post_id")
+    )
+    private final Set<Post> posts = new HashSet<>();
+
+    @ManyToMany(mappedBy = "followers")
+    private final Set<User> followed = new HashSet<>();
 
     @NotNull
     @Pattern(regexp = Constants.LOGIN_REGEX)
@@ -195,6 +212,23 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     public void setAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
+    }
+
+
+    public Set<User> getFollowers() {
+        return followers;
+    }
+
+    public Set<Post> getPosts() {
+        return posts;
+    }
+
+    public Set<User> getFollowed() {
+        return followed;
+    }
+
+    public boolean isActivated() {
+        return activated;
     }
 
     @Override

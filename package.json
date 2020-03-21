@@ -14,6 +14,7 @@
     "availity-reactstrap-validation": "2.5.1",
     "axios": "0.19.0",
     "bootstrap": "4.4.1",
+    "bower": "^1.8.8",
     "loaders.css": "0.1.2",
     "lodash": "4.17.15",
     "moment": "2.24.0",

@@ -46,8 +46,8 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:postgresql://localhost:5432/simple_twitter
-    username: simple_twitter
-    password:
+    username: postgres
+    password: nopassword
     hikari:
       poolName: Hikari
       auto-commit: false
