@@ -1,6 +1,8 @@
 package uz.owl.service.dto;
 
 
+import uz.owl.service.RatingType;
+
 public class PostDTO {
 
     private Long id;
@@ -9,13 +11,21 @@ public class PostDTO {
 
     private String body;
 
-    private String imageUrl;
 
     private Long likedCount;
 
     private Long dislikedCount;
 
     private Long regardedCount;
+
+    private UserDTO author;
+
+    private Long avatarId;
+
+
+    private RatingType ratingType;
+
+    private boolean regarded;
 
     public Long getId() {
         return id;
@@ -41,13 +51,6 @@ public class PostDTO {
         this.body = body;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 
     public Long getLikedCount() {
         return likedCount;
@@ -71,5 +74,37 @@ public class PostDTO {
 
     public void setRegardedCount(Long regardedCount) {
         this.regardedCount = regardedCount;
+    }
+
+    public UserDTO getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(UserDTO author) {
+        this.author = author;
+    }
+
+    public Long getAvatarId() {
+        return avatarId;
+    }
+
+    public void setAvatarId(Long avatarId) {
+        this.avatarId = avatarId;
+    }
+
+    public RatingType getRatingType() {
+        return ratingType;
+    }
+
+    public void setRatingType(RatingType ratingType) {
+        this.ratingType = ratingType;
+    }
+
+    public boolean isRegarded() {
+        return regarded;
+    }
+
+    public void setRegarded(boolean regarded) {
+        this.regarded = regarded;
     }
 }

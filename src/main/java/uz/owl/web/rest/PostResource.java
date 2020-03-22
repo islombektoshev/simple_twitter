@@ -32,7 +32,7 @@ public class PostResource {
     }
 
     @PostMapping("/post")
-    public ResponseEntity<PostDTO> createPost(PostDTO postDTO) {
+    public ResponseEntity<PostDTO> createPost(@RequestBody PostDTO postDTO) {
 
         return ResponseEntity.ok(postService.crateNewPost(postDTO));
     }
@@ -42,8 +42,13 @@ public class PostResource {
         return ResponseEntity.ok(postService.saveRating(ratingType, id));
     }
 
+    @PostMapping("/post/{id}/remove-rating")
+    public ResponseEntity<PostDTO> removeRating(RatingType ratingType, @PathVariable Long id) {
+        return ResponseEntity.ok(postService.removeRating(ratingType, id));
+    }
+
     @PutMapping("/post/{id}")
-    public ResponseEntity<PostDTO> updatePost(PostDTO postDTO, @PathVariable Long id){
+    public ResponseEntity<PostDTO> updatePost(PostDTO postDTO, @PathVariable Long id) {
         postDTO.setId(id);
         PostDTO updatePost = postService.updatePost(postDTO);
         return ResponseEntity.ok(updatePost);

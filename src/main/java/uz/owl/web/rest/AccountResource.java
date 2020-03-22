@@ -7,6 +7,7 @@ import uz.owl.service.MailService;
 import uz.owl.service.UserService;
 import uz.owl.service.dto.PasswordChangeDTO;
 import uz.owl.service.dto.UserDTO;
+import uz.owl.service.mapper.UserMapper;
 import uz.owl.web.rest.errors.*;
 import uz.owl.web.rest.vm.KeyAndPasswordVM;
 import uz.owl.web.rest.vm.ManagedUserVM;
@@ -42,18 +43,21 @@ public class AccountResource {
 
     private final MailService mailService;
 
-    public AccountResource(UserRepository userRepository, UserService userService, MailService mailService) {
+    private final UserMapper userMapper;
+
+    public AccountResource(UserRepository userRepository, UserService userService, MailService mailService, UserMapper userMapper) {
 
         this.userRepository = userRepository;
         this.userService = userService;
         this.mailService = mailService;
+        this.userMapper = userMapper;
     }
 
     /**
      * {@code POST  /register} : register the user.
      *
      * @param managedUserVM the managed user View Model.
-     * @throws InvalidPasswordException {@code 400 (Bad Request)} if the password is incorrect.
+     * @throws InvalidPasswordException  {@code 400 (Bad Request)} if the password is incorrect.
      * @throws EmailAlreadyUsedException {@code 400 (Bad Request)} if the email is already used.
      * @throws LoginAlreadyUsedException {@code 400 (Bad Request)} if the login is already used.
      */
@@ -111,7 +115,7 @@ public class AccountResource {
      *
      * @param userDTO the current user information.
      * @throws EmailAlreadyUsedException {@code 400 (Bad Request)} if the email is already used.
-     * @throws RuntimeException {@code 500 (Internal Server Error)} if the user login wasn't found.
+     * @throws RuntimeException          {@code 500 (Internal Server Error)} if the user login wasn't found.
      */
     @PostMapping("/account")
     public void saveAccount(@Valid @RequestBody UserDTO userDTO) {
@@ -125,7 +129,7 @@ public class AccountResource {
             throw new AccountResourceException("User could not be found");
         }
         userService.updateUser(userDTO.getFirstName(), userDTO.getLastName(), userDTO.getEmail(),
-            userDTO.getLangKey(), userDTO.getImageUrl());
+            userDTO.getLangKey(), userDTO.getAvatarId());
     }
 
     /**
@@ -164,7 +168,7 @@ public class AccountResource {
      *
      * @param keyAndPassword the generated key and the new password.
      * @throws InvalidPasswordException {@code 400 (Bad Request)} if the password is incorrect.
-     * @throws RuntimeException {@code 500 (Internal Server Error)} if the password could not be reset.
+     * @throws RuntimeException         {@code 500 (Internal Server Error)} if the password could not be reset.
      */
     @PostMapping(path = "/account/reset-password/finish")
     public void finishPasswordReset(@RequestBody KeyAndPasswordVM keyAndPassword) {

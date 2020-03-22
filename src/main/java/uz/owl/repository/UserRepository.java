@@ -1,5 +1,6 @@
 package uz.owl.repository;
 
+import org.springframework.data.jpa.repository.Query;
 import uz.owl.domain.User;
 
 import org.springframework.data.domain.Page;
@@ -41,4 +42,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findOneWithAuthoritiesByEmailIgnoreCase(String email);
 
     Page<User> findAllByLoginNot(Pageable pageable, String login);
+
+    @Query("select f from User u join u.followed f where u.id = :userId")
+    List<User> getFollowedUsers(Long userId);
 }

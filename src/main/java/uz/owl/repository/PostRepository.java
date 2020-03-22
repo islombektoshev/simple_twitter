@@ -11,7 +11,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query(value = "select p from Post p order by p.regardedCount desc ")
     List<Post> getMostPopular();
 
-    @Query(value = "select p from Post p order by p.createdDate asc ")
+    @Query(value = "select p from Post p order by p.createdDate desc ")
     List<Post> getNewest();
 
     @Query(nativeQuery = true, value = "select *\n" +
@@ -28,6 +28,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         "order by p.created_date DESC;")
     List<Post> getSubscribed(Long userId);
 
-    @Query(value = "select p from Post p order by p.likedCount asc ")
+    @Query(value = "select p from Post p order by p.likedCount desc ")
     List<Post> getTopRated();
+
+    List<Post> findAllByAuthorId(Long authorId);
 }

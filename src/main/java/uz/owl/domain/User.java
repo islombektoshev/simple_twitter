@@ -28,8 +28,10 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @SequenceGenerator(name = "sequenceGenerator")
     private Long id;
 
+    @OneToOne
+    private Avatar avatar;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "followers",
         inverseJoinColumns = @JoinColumn(name = "follower_id"),
@@ -37,16 +39,17 @@ public class User extends AbstractAuditingEntity implements Serializable {
     )
     private final Set<User> followers = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(
-        name = "posts",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "post_id")
-    )
+    @Column(name = "followers_count")
+    private Long followersCount;
+
+    @OneToMany
     private final Set<Post> posts = new HashSet<>();
 
-    @ManyToMany(mappedBy = "followers")
+    @ManyToMany(mappedBy = "followers",fetch = FetchType.EAGER)
     private final Set<User> followed = new HashSet<>();
+
+    @Column(name = "followed_count")
+    private Long followedCount;
 
     @NotNull
     @Pattern(regexp = Constants.LOGIN_REGEX)
@@ -229,6 +232,30 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     public boolean isActivated() {
         return activated;
+    }
+
+    public Avatar getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(Avatar avatar) {
+        this.avatar = avatar;
+    }
+
+    public Long getFollowersCount() {
+        return followersCount;
+    }
+
+    public void setFollowersCount(Long followersCount) {
+        this.followersCount = followersCount;
+    }
+
+    public Long getFollowedCount() {
+        return followedCount;
+    }
+
+    public void setFollowedCount(Long followedCount) {
+        this.followedCount = followedCount;
     }
 
     @Override

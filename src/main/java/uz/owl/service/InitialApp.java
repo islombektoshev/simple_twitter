@@ -51,21 +51,58 @@ public class InitialApp {
     }
 
     private void insertBasicUser() {
-        User user = new User();
-        user.setActivated(true);
-        Set<Authority> authorities = new HashSet<>();
-        authorities.add(authorityRepository.findByName(AuthoritiesConstants.ADMIN));
-        authorities.add(authorityRepository.findByName(AuthoritiesConstants.USER));
-        user.setAuthorities(authorities);
-        user.setEmail("makhmudovbekhruzish@gmail.com");
-        user.setFirstName("Bekhruz");
-        user.setImageUrl("https://dl.kraken.io/api/e5/be/54/f6d6dbd7fe1108bd4c296729a6/me.jpg");
-        user.setLangKey("en");
-        user.setLastName("Makhmudov");
-        user.setLogin("bekhruz");
-        user.setPassword(passwordEncoder.encode("admin"));
+        {
+            User user = new User();
+            user.setActivated(true);
+            Set<Authority> authorities = new HashSet<>();
+            authorities.add(authorityRepository.findByName(AuthoritiesConstants.ADMIN));
+            authorities.add(authorityRepository.findByName(AuthoritiesConstants.USER));
+            user.setAuthorities(authorities);
+            user.setEmail("makhmudovbekhruzish@gmail.com");
+            user.setFirstName("Bekhruz");
+            user.setImageUrl("https://dl.kraken.io/api/e5/be/54/f6d6dbd7fe1108bd4c296729a6/me.jpg");
+            user.setLangKey("en");
+            user.setLastName("Makhmudov");
+            user.setLogin("bekhruz");
+            user.setPassword(passwordEncoder.encode("admin"));
 
-        userRepository.save(user);
+            userRepository.save(user);
+        }
+        {
+            User user = new User();
+            user.setActivated(true);
+            Set<Authority> authorities = new HashSet<>();
+            authorities.add(authorityRepository.findByName(AuthoritiesConstants.ADMIN));
+            authorities.add(authorityRepository.findByName(AuthoritiesConstants.USER));
+            user.setAuthorities(authorities);
+            user.setEmail("liongreat@gmail.com");
+            user.setFirstName("Islom");
+            user.setImageUrl("https://dl.kraken.io/api/e5/be/54/f6d6dbd7fe1108bd4c296729a6/me.jpg");
+            user.setLangKey("en");
+            user.setLastName("Toshev");
+            user.setLogin("islom");
+            user.setPassword(passwordEncoder.encode("admin"));
+
+            userRepository.save(user);
+        }
+
+        {
+            User user = new User();
+            user.setActivated(true);
+            Set<Authority> authorities = new HashSet<>();
+            authorities.add(authorityRepository.findByName(AuthoritiesConstants.ADMIN));
+            authorities.add(authorityRepository.findByName(AuthoritiesConstants.USER));
+            user.setAuthorities(authorities);
+            user.setEmail("oybek@gmail.com");
+            user.setFirstName("Oybek");
+            user.setImageUrl("https://dl.kraken.io/api/e5/be/54/f6d6dbd7fe1108bd4c296729a6/me.jpg");
+            user.setLangKey("en");
+            user.setLastName("Muhiddinov");
+            user.setLogin("oybek");
+            user.setPassword(passwordEncoder.encode("admin"));
+
+            userRepository.save(user);
+        }
     }
 
 }

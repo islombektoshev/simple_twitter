@@ -1,22 +1,33 @@
 package uz.owl.service.mapper;
 
+import com.netflix.discovery.converters.Auto;
+import org.springframework.beans.factory.annotation.Autowired;
 import uz.owl.domain.Authority;
 import uz.owl.domain.User;
+import uz.owl.repository.PostRepository;
+import uz.owl.repository.UserRepository;
+import uz.owl.security.SecurityUtils;
 import uz.owl.service.dto.UserDTO;
 
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * Mapper for the entity {@link User} and its DTO called {@link UserDTO}.
- *
+ * <p>
  * Normal mappers are generated using MapStruct, this one is hand-coded as MapStruct
  * support is still in beta, and requires a manual step with an IDE.
  */
 @Service
 public class UserMapper {
+
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PostRepository postRepository;
 
     public List<UserDTO> usersToUserDTOs(List<User> users) {
         return users.stream()
@@ -36,6 +47,7 @@ public class UserMapper {
             .collect(Collectors.toList());
     }
 
+    @Transactional
     public User userDTOToUser(UserDTO userDTO) {
         if (userDTO == null) {
             return null;
@@ -53,6 +65,29 @@ public class UserMapper {
             user.setAuthorities(authorities);
             return user;
         }
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public UserDTO toUserDTO(User user) {
+        UserDTO userDTO = new UserDTO(user);
+
+        User sessionUser = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get()).get();
+        boolean isFollower = user.getFollowers().contains(sessionUser);
+        boolean isFollowed = sessionUser.getFollowers().contains(user);
+        userDTO.setFollowed(isFollowed);
+        userDTO.setFollower(isFollower);
+
+        int followerCount = user.getFollowers().size();
+        userDTO.setFollowersCount((long) followerCount);
+
+        int followedCount = userRepository.getFollowedUsers(user.getId()).size();
+        userDTO.setFollowedCount((long) followedCount);
+
+        int postCount = postRepository.findAllByAuthorId(sessionUser.getId()).size();
+
+        userDTO.setPostCount((long) postCount);
+
+        return userDTO;
     }
 
 

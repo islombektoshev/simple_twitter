@@ -24,9 +24,23 @@ public class Post extends AbstractAuditingEntity implements Serializable {
     @Column(name = "body")
     private String body;
 
+    @Column(name = "avatar_id", updatable = false, insertable = false)
+    private Long avatarId;
+
+    @OneToOne
+    @JoinColumn(name = "avatar_id")
+    private Avatar avatar;
+
     @Lob
     @Column(name = "image_url")
     private String imageUrl;
+
+    @Column(name = "author_id", insertable = false, updatable = false, nullable = false)
+    private Long authorId;
+
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private User author;
 
 
     @ManyToMany
@@ -37,7 +51,7 @@ public class Post extends AbstractAuditingEntity implements Serializable {
     )
     private final Set<User> likedUsers = new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "disliked_users",
         joinColumns = @JoinColumn(name = "post_id"),
@@ -45,7 +59,7 @@ public class Post extends AbstractAuditingEntity implements Serializable {
     )
     private final Set<User> dislikedUsers = new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "regarded_users",
         joinColumns = @JoinColumn(name = "post_id"),
@@ -123,18 +137,51 @@ public class Post extends AbstractAuditingEntity implements Serializable {
         return regardedCount;
     }
 
+    public Long getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(Long authorId) {
+        this.authorId = authorId;
+    }
+
+    public User getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(User author) {
+        this.author = author;
+    }
+
     public void setRegardedCount(Long regardedCount) {
         this.regardedCount = regardedCount;
     }
-    public PostDTO toDTO(){
+
+    public Avatar getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(Avatar avatar) {
+        this.avatar = avatar;
+    }
+
+    public Long getAvatarId() {
+        return avatarId;
+    }
+
+    public void setAvatarId(Long avatarId) {
+        this.avatarId = avatarId;
+    }
+
+    public PostDTO toDTO() {
         PostDTO postDTO = new PostDTO();
         postDTO.setBody(getBody());
         postDTO.setDislikedCount(getDislikedCount());
         postDTO.setId(getId());
-        postDTO.setImageUrl(getImageUrl());
         postDTO.setLikedCount(getLikedCount());
         postDTO.setRegardedCount(getRegardedCount());
         postDTO.setTitle(getTitle());
+        postDTO.setAvatarId(getAvatarId());
         return postDTO;
     }
 }

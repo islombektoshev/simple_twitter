@@ -2,8 +2,10 @@ package uz.owl.service;
 
 import uz.owl.config.Constants;
 import uz.owl.domain.Authority;
+import uz.owl.domain.Avatar;
 import uz.owl.domain.User;
 import uz.owl.repository.AuthorityRepository;
+import uz.owl.repository.AvatarRepository;
 import uz.owl.repository.UserRepository;
 import uz.owl.security.AuthoritiesConstants;
 import uz.owl.security.SecurityUtils;
@@ -19,6 +21,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uz.owl.service.mapper.UserMapper;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -40,10 +43,16 @@ public class UserService {
 
     private final AuthorityRepository authorityRepository;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository) {
+    private final AvatarRepository avatarRepository;
+
+    private final UserMapper userMapper;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository, AvatarRepository avatarRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authorityRepository = authorityRepository;
+        this.avatarRepository = avatarRepository;
+        this.userMapper = userMapper;
     }
 
     public Optional<User> activateRegistration(String key) {
@@ -104,6 +113,10 @@ public class UserService {
             newUser.setEmail(userDTO.getEmail().toLowerCase());
         }
         newUser.setImageUrl(userDTO.getImageUrl());
+        if (userDTO.getAvatarId() != null) {
+            Avatar avatar = avatarRepository.getOne(userDTO.getAvatarId());
+            newUser.setAvatar(avatar);
+        }
         newUser.setLangKey(userDTO.getLangKey());
         // new user is not active
         newUser.setActivated(false);
@@ -119,7 +132,7 @@ public class UserService {
 
     private boolean removeNonActivatedUser(User existingUser) {
         if (existingUser.getActivated()) {
-             return false;
+            return false;
         }
         userRepository.delete(existingUser);
         userRepository.flush();
@@ -135,6 +148,8 @@ public class UserService {
             user.setEmail(userDTO.getEmail().toLowerCase());
         }
         user.setImageUrl(userDTO.getImageUrl());
+        Avatar avatar = avatarRepository.getOne(userDTO.getAvatarId());
+        user.setAvatar(avatar);
         if (userDTO.getLangKey() == null) {
             user.setLangKey(Constants.DEFAULT_LANGUAGE); // default language
         } else {
@@ -165,9 +180,8 @@ public class UserService {
      * @param lastName  last name of user.
      * @param email     email id of user.
      * @param langKey   language key.
-     * @param imageUrl  image URL of user.
      */
-    public void updateUser(String firstName, String lastName, String email, String langKey, String imageUrl) {
+    public void updateUser(String firstName, String lastName, String email, String langKey, Long avatarId) {
         SecurityUtils.getCurrentUserLogin()
             .flatMap(userRepository::findOneByLogin)
             .ifPresent(user -> {
@@ -177,7 +191,8 @@ public class UserService {
                     user.setEmail(email.toLowerCase());
                 }
                 user.setLangKey(langKey);
-                user.setImageUrl(imageUrl);
+                Avatar avatar = avatarRepository.getOne(avatarId);
+                user.setAvatar(avatar);
                 log.debug("Changed Information for User: {}", user);
             });
     }
@@ -201,6 +216,8 @@ public class UserService {
                     user.setEmail(userDTO.getEmail().toLowerCase());
                 }
                 user.setImageUrl(userDTO.getImageUrl());
+                Avatar avatar = avatarRepository.getOne(userDTO.getAvatarId());
+                user.setAvatar(avatar);
                 user.setActivated(userDTO.isActivated());
                 user.setLangKey(userDTO.getLangKey());
                 Set<Authority> managedAuthorities = user.getAuthorities();
@@ -274,10 +291,54 @@ public class UserService {
 
     /**
      * Gets a list of all the authorities.
+     *
      * @return a list of all the authorities.
      */
     public List<String> getAuthorities() {
         return authorityRepository.findAll().stream().map(Authority::getName).collect(Collectors.toList());
+    }
+
+
+    public UserDTO subscribe(Long userId) {
+        User user = userRepository.getOne(userId);
+        User sessionUser = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get()).get();
+        user.getFollowers().add(sessionUser);
+
+        User save = userRepository.save(user);
+
+        return userMapper.toUserDTO(save);
+    }
+
+    public UserDTO unsubscribe(Long userId) {
+        User user = userRepository.getOne(userId);
+        User sessionUser = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get()).get();
+        user.getFollowers().remove(sessionUser);
+        User save = userRepository.save(user);
+
+        return userMapper.toUserDTO(save);
+    }
+
+    public List<UserDTO> getAllSubscribers(Long userId) {
+        User user = userRepository.getOne(userId);
+
+        return user.getFollowers().stream().map(userMapper::toUserDTO).collect(Collectors.toList());
+    }
+
+    public List<UserDTO> getAllFollowedUsers(Long userId) {
+        User user = userRepository.getOne(userId);
+
+        List<User> followedUsers = userRepository.getFollowedUsers(user.getId());
+
+
+        List<UserDTO> collect = followedUsers.stream().map(userMapper::toUserDTO).collect(Collectors.toList());
+        return collect;
+    }
+
+    @Transactional
+    public UserDTO getUserInfo() {
+        User sessionUser = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get()).get();
+
+        return userMapper.toUserDTO(sessionUser);
     }
 
 }

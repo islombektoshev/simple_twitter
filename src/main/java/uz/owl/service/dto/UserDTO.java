@@ -22,6 +22,18 @@ public class UserDTO {
     @Size(min = 1, max = 50)
     private String login;
 
+    private Long avatarId;
+
+    private Long followersCount;
+
+    private Long followedCount;
+
+    private boolean isFollowed;
+
+    private boolean isFollower;
+
+    private Long postCount;
+
     @Size(max = 50)
     private String firstName;
 
@@ -67,6 +79,11 @@ public class UserDTO {
         this.createdDate = user.getCreatedDate();
         this.lastModifiedBy = user.getLastModifiedBy();
         this.lastModifiedDate = user.getLastModifiedDate();
+        this.avatarId = user.getAvatar() != null ? user.getAvatar().getAvatarId() : null;
+        this.followedCount = user.getFollowedCount();
+        this.isFollowed = false;
+        this.followersCount = user.getFollowersCount();
+        this.isFollower = false;
         this.authorities = user.getAuthorities().stream()
             .map(Authority::getName)
             .collect(Collectors.toSet());
@@ -174,6 +191,54 @@ public class UserDTO {
 
     public void setAuthorities(Set<String> authorities) {
         this.authorities = authorities;
+    }
+
+    public Long getAvatarId() {
+        return avatarId;
+    }
+
+    public void setAvatarId(Long avatarId) {
+        this.avatarId = avatarId;
+    }
+
+    public Long getFollowersCount() {
+        return followersCount;
+    }
+
+    public void setFollowersCount(Long followersCount) {
+        this.followersCount = followersCount;
+    }
+
+    public Long getFollowedCount() {
+        return followedCount;
+    }
+
+    public void setFollowedCount(Long followedCount) {
+        this.followedCount = followedCount;
+    }
+
+    public boolean isFollowed() {
+        return isFollowed;
+    }
+
+    public void setFollowed(boolean followed) {
+        isFollowed = followed;
+    }
+
+    public boolean isFollower() {
+        return isFollower;
+    }
+
+    public void setFollower(boolean follower) {
+        isFollower = follower;
+    }
+
+    public Long getPostCount() {
+        return postCount;
+    }
+
+    public void setPostCount(Long postCount) {
+        this.postCount = postCount;
     }
 
     @Override
