@@ -84,8 +84,6 @@ management:
             enabled: true
 
 spring:
-  profiles:
-    active: dev
   application:
     name: simple_twitter
   jmx:
