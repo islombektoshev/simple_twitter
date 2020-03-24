@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uz.owl.domain.Post;
 import uz.owl.domain.User;
 import uz.owl.repository.UserRepository;
+import uz.owl.security.SecurityUtils;
 import uz.owl.service.RatingType;
 import uz.owl.service.dto.PostDTO;
 import uz.owl.service.dto.UserDTO;
@@ -38,22 +39,24 @@ public class PostMapper {
         UserDTO userDTO = userMapper.toUserDTO(user);
         postDTO.setAuthor(userDTO);
 
+        User sessionUSer = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get()).get();
+
         postDTO.setRegarded(false);
         post.getRegardedUsers().forEach(user1 -> {
-            if (user1.getId().equals(user.getId())) {
+            if (user1.getId().equals(sessionUSer.getId())) {
                 postDTO.setRegarded(true);
             }
         });
 
         post.getLikedUsers().forEach(user1 -> {
-            if (user1.getId().equals(user.getId())) {
+            if (user1.getId().equals(sessionUSer.getId())) {
                 postDTO.setRatingType(RatingType.like);
             }
         });
 
-        if (postDTO.getRatingType() != null) {
+        if (postDTO.getRatingType() == null) {
             post.getDislikedUsers().forEach(user1 -> {
-                if (user1.getId().equals(user.getId())) {
+                if (user1.getId().equals(sessionUSer.getId())) {
                     postDTO.setRatingType(RatingType.dislike);
                 }
             });

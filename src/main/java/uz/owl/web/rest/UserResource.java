@@ -208,8 +208,15 @@ public class UserResource {
         return ResponseEntity.ok(userService.getAllFollowedUsers(userId));
     }
 
+    @GetMapping("/account-info/{userId}")
+    public ResponseEntity<UserDTO> getUserINfoById(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getUserInfo(userId));
+    }
+
+
     @GetMapping("/account-info")
     public ResponseEntity<UserDTO> getUserINfo() {
+
         return ResponseEntity.ok(userService.getUserInfo());
     }
 }

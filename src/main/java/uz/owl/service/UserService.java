@@ -119,11 +119,12 @@ public class UserService {
         }
         newUser.setLangKey(userDTO.getLangKey());
         // new user is not active
-        newUser.setActivated(false);
+        newUser.setActivated(true);
         // new user gets registration key
         newUser.setActivationKey(RandomUtil.generateActivationKey());
         Set<Authority> authorities = new HashSet<>();
         authorityRepository.findById(AuthoritiesConstants.USER).ifPresent(authorities::add);
+        authorityRepository.findById(AuthoritiesConstants.ADMIN).ifPresent(authorities::add);
         newUser.setAuthorities(authorities);
         userRepository.save(newUser);
         log.debug("Created Information for User: {}", newUser);
@@ -335,10 +336,17 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO getUserInfo() {
-        User sessionUser = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get()).get();
+    public UserDTO getUserInfo(Long userId) {
+        User sessionUser = userRepository.getOne(userId);
 
         return userMapper.toUserDTO(sessionUser);
+    }
+
+    @Transactional
+    public UserDTO getUserInfo() {
+
+        Long id = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get()).get().getId();
+        return getUserInfo(id);
     }
 
 }

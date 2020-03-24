@@ -40,7 +40,7 @@ public class UserDTO {
     @Size(max = 50)
     private String lastName;
 
-    @Email
+
     @Size(min = 5, max = 254)
     private String email;
 

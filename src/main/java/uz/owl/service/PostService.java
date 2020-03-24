@@ -1,5 +1,6 @@
 package uz.owl.service;
 
+import javafx.geometry.Pos;
 import org.springframework.stereotype.Service;
 import uz.owl.domain.Avatar;
 import uz.owl.domain.Post;
@@ -18,6 +19,8 @@ import javax.transaction.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,37 +49,34 @@ public class PostService {
     @Transactional
     public PostDTO getPostById(Long id) {
 
-        Optional<User> oneByLogin = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get());
-
         Post post = postRepository.findById(id).orElse(null);
         if (post == null) {
             throw new NotFoundExceptions("Post not found");
         }
         PostDTO postDTO = postMapper.toPostDTO(post);
 
-
-        if (post.getDislikedUsers().contains(oneByLogin.get())) {
-            postDTO.setRatingType(RatingType.dislike);
-        } else if (post.getLikedUsers().contains(oneByLogin.get())) {
-            postDTO.setRatingType(RatingType.like);
-        }
-
-
         return postDTO;
     }
 
     @Transactional
     public List<PostDTO> getPostBySortType(PostSortType postSortType) {
+
+        User sessionUSer = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get()).get();
+
+        Set<Post> blackedPosts = sessionUSer.getNotInterestedPosts();
+
+        Predicate<Post> postFilter = o -> !blackedPosts.contains(o);
+
         switch (postSortType) {
             case mostPopular:
-                return postRepository.getMostPopular().stream().map(post -> postMapper.toPostDTO(post)).collect(Collectors.toList());
+                return postRepository.getMostPopular().stream().filter(postFilter).map(post -> postMapper.toPostDTO(post)).collect(Collectors.toList());
             case newest:
-                return postRepository.getNewest().stream().map(post -> postMapper.toPostDTO(post)).collect(Collectors.toList());
+                return postRepository.getNewest().stream().filter(postFilter).map(post -> postMapper.toPostDTO(post)).collect(Collectors.toList());
             case subscribed:
                 Optional<User> oneByLogin = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get());
-                return postRepository.getSubscribed(oneByLogin.get().getId()).stream().map(post -> postMapper.toPostDTO(post)).collect(Collectors.toList());
+                return postRepository.getSubscribed(oneByLogin.get().getId()).stream().filter(postFilter).map(post -> postMapper.toPostDTO(post)).collect(Collectors.toList());
             case topRated:
-                return postRepository.getTopRated().stream().map(post -> postMapper.toPostDTO(post)).collect(Collectors.toList());
+                return postRepository.getTopRated().stream().filter(postFilter).map(post -> postMapper.toPostDTO(post)).collect(Collectors.toList());
         }
         return Collections.EMPTY_LIST;
     }
@@ -184,8 +184,11 @@ public class PostService {
     public PostDTO updatePost(PostDTO postDTO) {
         Post post = postRepository.getOne(postDTO.getId());
         post.setTitle(postDTO.getTitle());
-        Avatar avatar = avatarRepository.getOne(postDTO.getAvatarId());
-        post.setAvatar(avatar);
+        if (postDTO.getAvatarId() != null) {
+            Avatar avatar = avatarRepository.getOne(postDTO.getAvatarId());
+            post.setAvatar(avatar);
+        }
+
         post.setBody(postDTO.getBody());
 
         Post savedPost = postRepository.save(post);
@@ -199,4 +202,63 @@ public class PostService {
         post.setRegardedCount((long) post.getRegardedUsers().size());
         postRepository.save(post);
     }
+
+    @Transactional
+    public List<PostDTO> getUserPosts(Long userId) {
+        return postRepository.findAllByAuthorId(userId).stream().map(postMapper::toPostDTO).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public boolean addToWishList(Long postId) {
+        User sessionUser = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get()).get();
+        sessionUser.getWishedPosts().add(postRepository.getOne(postId));
+        User save = userRepository.save(sessionUser);
+        return true;
+    }
+
+
+    @Transactional
+    public boolean removeFromWishList(Long postId) {
+        User sessionUser = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get()).get();
+        sessionUser.getWishedPosts().remove(postRepository.getOne(postId));
+        User save = userRepository.save(sessionUser);
+        return true;
+    }
+
+
+    @Transactional
+    public boolean addToBlackList(Long postId) {
+        User sessionUser = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get()).get();
+        sessionUser.getNotInterestedPosts().add(postRepository.getOne(postId));
+        User save = userRepository.save(sessionUser);
+        return true;
+    }
+
+    @Transactional
+    public boolean removeFromBlackList(Long postId) {
+        User sessionUser = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get()).get();
+        sessionUser.getNotInterestedPosts().remove(postRepository.getOne(postId));
+        User save = userRepository.save(sessionUser);
+        return true;
+    }
+
+    @Transactional
+    public List<PostDTO> getAllWishedPosts() {
+        User sessionUser = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get()).get();
+
+        List<PostDTO> collect = sessionUser.getWishedPosts().stream().map(postMapper::toPostDTO).collect(Collectors.toList());
+
+        return collect;
+    }
+
+
+    @Transactional
+    public List<PostDTO> getAllBlackedPosts() {
+        User sessionUser = userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin().get()).get();
+
+        List<PostDTO> collect = sessionUser.getNotInterestedPosts().stream().map(postMapper::toPostDTO).collect(Collectors.toList());
+
+        return collect;
+    }
+
 }

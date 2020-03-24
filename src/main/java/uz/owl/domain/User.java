@@ -39,13 +39,30 @@ public class User extends AbstractAuditingEntity implements Serializable {
     )
     private final Set<User> followers = new HashSet<>();
 
+
+    @ManyToMany
+    @JoinTable(name = "wished_posts",
+        inverseJoinColumns = @JoinColumn(name = "post_id"),
+        joinColumns = @JoinColumn(name = "user_id")
+    )
+    private final Set<Post> wishedPosts = new HashSet<>();
+
+
+    @ManyToMany
+    @JoinTable(name = "not_interested_posts",
+        inverseJoinColumns = @JoinColumn(name = "post_id"),
+        joinColumns = @JoinColumn(name = "user_id")
+    )
+    private final Set<Post> notInterestedPosts = new HashSet<>();
+
+
     @Column(name = "followers_count")
     private Long followersCount;
 
     @OneToMany
     private final Set<Post> posts = new HashSet<>();
 
-    @ManyToMany(mappedBy = "followers",fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "followers", fetch = FetchType.EAGER)
     private final Set<User> followed = new HashSet<>();
 
     @Column(name = "followed_count")
@@ -256,6 +273,14 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     public void setFollowedCount(Long followedCount) {
         this.followedCount = followedCount;
+    }
+
+    public Set<Post> getWishedPosts() {
+        return wishedPosts;
+    }
+
+    public Set<Post> getNotInterestedPosts() {
+        return notInterestedPosts;
     }
 
     @Override

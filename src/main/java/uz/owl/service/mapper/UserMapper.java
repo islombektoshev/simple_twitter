@@ -3,6 +3,7 @@ package uz.owl.service.mapper;
 import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import uz.owl.domain.Authority;
+import uz.owl.domain.Post;
 import uz.owl.domain.User;
 import uz.owl.repository.PostRepository;
 import uz.owl.repository.UserRepository;
@@ -83,9 +84,9 @@ public class UserMapper {
         int followedCount = userRepository.getFollowedUsers(user.getId()).size();
         userDTO.setFollowedCount((long) followedCount);
 
-        int postCount = postRepository.findAllByAuthorId(sessionUser.getId()).size();
+        List<Post> allByAuthorId = postRepository.findAllByAuthorId(user.getId());
 
-        userDTO.setPostCount((long) postCount);
+        userDTO.setPostCount((long) allByAuthorId.size());
 
         return userDTO;
     }
